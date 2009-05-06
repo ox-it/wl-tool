@@ -21,6 +21,7 @@
 
 package org.sakaiproject.tool.su;
 
+import java.util.Collection;
 import java.util.Vector;
 
 import javax.faces.application.FacesMessage;
@@ -101,31 +102,46 @@ public class SuTool
 			confirm = false;
 			return "unauthorized";
 		}
-
-		try
+		
+		String possUsername = username.trim();
+		
+		userinfo = getUserById(possUsername);
+		if (userinfo == null)
 		{
-			// try with the user id
-			userinfo = M_uds.getUser(username.trim());
-			validatedUserId = userinfo.getId();
-			validatedUserEid = userinfo.getEid();
-		}
-		catch (UserNotDefinedException e)
-		{
-			try
+			userinfo = getUserByEid(possUsername);
+			if (userinfo == null)
 			{
-				// try with the user eid
-				userinfo = M_uds.getUserByEid(username.trim());
-				validatedUserId = userinfo.getId();
-				validatedUserEid = userinfo.getEid();
+				userinfo = getUserByAid(possUsername);
 			}
-			catch (UserNotDefinedException ee)
+		}
+		if (userinfo == null)
+		{
+			Collection users = M_uds.findUsersByEmail(possUsername);
+			if (users.size() == 1)
 			{
-				message = msgs.getString("no_such_user") + ": " + username;
-				fc.addMessage("su", new FacesMessage(FacesMessage.SEVERITY_ERROR, message, message + ":" + ee));
-				M_log.warn("[SuTool] Exception: " + message);
+				userinfo = (User) users.iterator().next();
+			}
+			else if (users.size() > 1) 
+			{
+				message = msgs.getFormattedMessage("more_than_one_email", new Object[]{username});
+				fc.addMessage("su", new FacesMessage(FacesMessage.SEVERITY_ERROR, message, message + ":"));
 				confirm = false;
 				return "error";
 			}
+			else
+			{
+				message = msgs.getString("no_such_user") + ": " + username;
+				fc.addMessage("su", new FacesMessage(FacesMessage.SEVERITY_ERROR, message, message + ":"));
+				confirm = false;
+				return "error";
+			}
+			
+		}
+		else
+		{
+			// Found a user to setup ready.
+			validatedUserId = userinfo.getId();
+			validatedUserEid = userinfo.getEid();
 		}
 
 		if (!confirm)
@@ -157,7 +173,43 @@ public class SuTool
 
 		return "redirect";
 	}
-
+	
+	private User getUserById(String username)
+	{
+		try
+		{
+			// try with the user id
+			userinfo = M_uds.getUser(username);
+			return userinfo;
+		} catch (UserNotDefinedException unde) {
+			return null;
+		}
+	}
+	
+	private User getUserByEid(String username)
+	{
+		try
+		{
+			// try with the user id
+			userinfo = M_uds.getUserByEid(username);
+			return userinfo;
+		} catch (UserNotDefinedException unde) {
+			return null;
+		}
+	}
+	private User getUserByAid(String username)
+	{
+		try
+		{
+			// try with the user id
+			userinfo = M_uds.getUserByAid(username);
+			return userinfo;
+		} catch (UserNotDefinedException unde) {
+			return null;
+		}
+	}
+	
+	
 	// simple way to support 2 buttons that do almost the same thing
 	public String confirm()
 	{
