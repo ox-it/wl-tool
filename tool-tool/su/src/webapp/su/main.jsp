@@ -32,6 +32,10 @@
 		  <h:outputText value="#{SuTool.userinfo.displayName}" />
 		  <h:outputText value="#{msgs.email}" />
 		  <h:outputText value="#{SuTool.userinfo.email}" />
+		  <h:outputText value="#{msgs.id}" />
+		  <h:outputText value="#{SuTool.userinfo.id}"/>
+		  <h:outputText value="#{msgs.eid}" />
+		  <h:outputText value="#{SuTool.userinfo.eid}"/>
 		  <h:outputText value="#{msgs.type}" />
 		  <h:outputText value="#{SuTool.userinfo.type}" />
 		  <h:outputText value="#{msgs.created}" />
