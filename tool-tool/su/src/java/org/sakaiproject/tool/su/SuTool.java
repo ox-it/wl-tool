@@ -135,9 +135,9 @@ public class SuTool
 				confirm = false;
 				return "error";
 			}
-			
 		}
-		else
+		
+		if (userinfo != null)
 		{
 			// Found a user to setup ready.
 			validatedUserId = userinfo.getId();
