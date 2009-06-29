@@ -1372,7 +1372,7 @@ public class RequestFilter implements Filter
 	}
 	
 	/**
-	 * We can't do this at init time as it hasn't been set yet (sakai hasn't started).
+	 * We can't do this at init time as it might not have been set yet (sakai hasn't started).
 	 * @return The cookie suffix to use.
 	 */
 	private String getCookieSuffix()
@@ -1386,6 +1386,7 @@ public class RequestFilter implements Filter
 				M_log.warn("no sakai.serverId system property set - mod_jk load balancing will not function properly");
 			}
 			m_displayModJkWarning = false;
+			suffix = "sakai";
 		}
 		return suffix;
 	}
