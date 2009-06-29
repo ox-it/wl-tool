@@ -1181,7 +1181,7 @@ public class RequestFilter implements Filter
 		SessionManager.setCurrentSession(s);
 
 		// if we had a cookie and we have no session, clear the cookie TODO: detect closed session in the request
-		if ((s != null) && allowSetCookieEarly)
+		if ((s == null) && (c != null))
 		{
 			// remove the cookie
 			c = new Cookie(SESSION_COOKIE, "");
