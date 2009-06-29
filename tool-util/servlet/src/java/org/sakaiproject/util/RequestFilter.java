@@ -622,10 +622,11 @@ public class RequestFilter implements Filter
 					if (m_setCookie && s != null && req.getAttribute(ATTR_SET_COOKIE) != null) {
 						
 						// check for existing cookie
-						Cookie c = findCookie(req, SESSION_COOKIE, getCookieSuffix());
+						String suffix = getCookieSuffix();
+						Cookie c = findCookie(req, SESSION_COOKIE, suffix);
 
 						// the cookie value we need to use
-						String sessionId = s.getId() + DOT + getCookieSuffix();
+						String sessionId = s.getId() + DOT + suffix;
 
 						// set the cookie if necessary
 						if ((c == null) || (!c.getValue().equals(sessionId))) {
@@ -1085,6 +1086,8 @@ public class RequestFilter implements Filter
 		// automatic, i.e. not from user activite, request?
 		boolean auto = req.getParameter(PARAM_AUTO) != null;
 
+		String suffix = getCookieSuffix();
+
 		// try finding a non-cookie session based on the remote user / principal
 		// Note: use principal instead of remote user to avoid any possible confusion with the remote user set by single-signon
 		// auth.
@@ -1119,7 +1122,7 @@ public class RequestFilter implements Filter
 			sessionId = req.getParameter(ATTR_SESSION);
 
 			// find our session id from our cookie
-			c = findCookie(req, SESSION_COOKIE, getCookieSuffix());
+			c = findCookie(req, SESSION_COOKIE, suffix);
 
 			if (sessionId == null && c != null)
 			{
@@ -1184,7 +1187,7 @@ public class RequestFilter implements Filter
 		if (s != null && allowSetCookieEarly && m_setCookie)
 		{
 			// the cookie value we need to use
-			sessionId = s.getId() + DOT + getCookieSuffix();
+			sessionId = s.getId() + DOT + suffix;
 
 			if ((c == null) || (!c.getValue().equals(sessionId)))
 			{
