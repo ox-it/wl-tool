@@ -259,9 +259,6 @@ public class RequestFilter implements Filter
 	/** Should we attempt to set a new cookie if we create a new session. */
 	protected boolean m_setCookie = true;
 
-	/** Suffix for cookies */
-	protected String suffix = "sakai";
-	
 	/**
 	 * Wraps a request object so we can override some standard behavior.
 	 */
@@ -625,10 +622,10 @@ public class RequestFilter implements Filter
 					if (m_setCookie && s != null && req.getAttribute(ATTR_SET_COOKIE) != null) {
 						
 						// check for existing cookie
-						Cookie c = findCookie(req, SESSION_COOKIE, suffix);
+						Cookie c = findCookie(req, SESSION_COOKIE, getCookieSuffix());
 
 						// the cookie value we need to use
-						String sessionId = s.getId() + DOT + suffix;
+						String sessionId = s.getId() + DOT + getCookieSuffix();
 
 						// set the cookie if necessary
 						if ((c == null) || (!c.getValue().equals(sessionId))) {
@@ -855,14 +852,6 @@ public class RequestFilter implements Filter
 		{
 			M_log.warn("overridding " + CONFIG_MAX_PER_FILE + " setting: must be 'true' with " + CONFIG_CONTINUE + " ='true'");
 			m_uploadMaxPerFile = true;
-		}
-
-		// compute the session cookie suffix, based on this configured server id
-		suffix = System.getProperty(SAKAI_SERVERID);
-		if ((suffix == null) || (suffix.length() == 0))
-		{
-			M_log.warn("no sakai.serverId system property set - mod_jk load balancing will not function properly");
-			suffix = "sakai";
 		}
 	
 	}
@@ -1130,7 +1119,7 @@ public class RequestFilter implements Filter
 			sessionId = req.getParameter(ATTR_SESSION);
 
 			// find our session id from our cookie
-			c = findCookie(req, SESSION_COOKIE, suffix);
+			c = findCookie(req, SESSION_COOKIE, getCookieSuffix());
 
 			if (sessionId == null && c != null)
 			{
@@ -1195,7 +1184,7 @@ public class RequestFilter implements Filter
 		if (s != null && allowSetCookieEarly && m_setCookie)
 		{
 			// the cookie value we need to use
-			sessionId = s.getId() + DOT + suffix;
+			sessionId = s.getId() + DOT + getCookieSuffix();
 
 			if ((c == null) || (!c.getValue().equals(sessionId)))
 			{
@@ -1380,5 +1369,24 @@ public class RequestFilter implements Filter
 		}
 
 		return url.toString();
+	}
+	
+	/**
+	 * We can't do this at init time as it hasn't been set yet (sakai hasn't started).
+	 * @return The cookie suffix to use.
+	 */
+	private String getCookieSuffix()
+	{
+		// compute the session cookie suffix, based on this configured server id
+		String suffix = System.getProperty(SAKAI_SERVERID);
+		if ((suffix == null) || (suffix.length() == 0))
+		{
+			if (m_displayModJkWarning)
+			{
+				M_log.warn("no sakai.serverId system property set - mod_jk load balancing will not function properly");
+			}
+			m_displayModJkWarning = false;
+		}
+		return suffix;
 	}
 }
