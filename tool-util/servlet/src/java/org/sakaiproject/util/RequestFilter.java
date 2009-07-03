@@ -655,7 +655,6 @@ public class RequestFilter implements Filter
 							{
 								resp.addCookie(c);
 							}
-							resp.addCookie(c);
 						}
 					}
 				}
