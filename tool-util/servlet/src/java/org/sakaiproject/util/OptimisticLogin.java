@@ -31,9 +31,9 @@ public class OptimisticLogin implements Filter {
 
 	private String cookieName = "webauth_found";
 
-	private boolean strictDomain = true;
-
 	private String loginUrl = "/sakai-login-tool/container";
+
+	private String redirectParam = "redirect";
 
 	public void destroy() {
 		log.debug("destroy");
@@ -44,7 +44,7 @@ public class OptimisticLogin implements Filter {
 		if (request instanceof HttpServletRequest
 				&& response instanceof HttpServletResponse) {
 			HttpServletRequest httpRequest = (HttpServletRequest) request;
-			if (hasCookie(httpRequest)) {
+			if (hasCookie(httpRequest) && httpRequest.getParameter(redirectParam) == null) {
 				String userId = SessionManager.getCurrentSessionUserId();
 				if (userId == null) {
 					// Ok, time to redirect then.
@@ -55,7 +55,7 @@ public class OptimisticLogin implements Filter {
 							originalUrl.append("?").append(httpRequest.getQueryString());
 					}
 					String redirectUrl = new StringBuilder(loginUrl).append(
-							"?redirect=").append(
+							"?").append(redirectParam).append("=").append(
 							URLEncoder.encode(originalUrl.toString(), "UTF-8")).toString();
 					httpResponse.sendRedirect(redirectUrl);
 					return;
@@ -86,13 +86,7 @@ public class OptimisticLogin implements Filter {
 					// If found multiple cookie.
 					multipleMatches = hasCookie;
 					// IE seems to send too many cookies.
-					if (strictDomain) {
-						if (cookie.getDomain() == null || domain.equals(cookie.getDomain())) {
-							hasCookie = true;
-						}
-					} else {
-						hasCookie = true;
-					}
+					hasCookie = true;
 				}
 			}
 			if (multipleMatches && log.isDebugEnabled()) {
